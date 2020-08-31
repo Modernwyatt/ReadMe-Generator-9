@@ -1,112 +1,79 @@
-const inquirer = require("inquirer");
-const fs = require("fs");
-const util = require("util");
-const writeFileAsync = util.promisify(fs.writeFile);
+const prompt = require('inquirer').createPromptModule()
+const fs = require('fs')
 
+const api = require('./utils/api.js')
+const generateMarkdown = require('./utils/generateMarkdown.js')
 
-
-// array of questions for user
-const questions = [
-
-];
-
-// function to write README file
-function writeToFile(fileName, data) {
+const writeToFile = (fileName, data) => {
+  fs.writeFile(fileName + '.md', data, error => error ? console.error(error) : console.log(`${fileName + '.md'} generated!`))
 }
 
-// function to initialize program
-function init() {
-
+const init = async _ => {
+  let rmObject = {}
+  do {
+    const { rmUser, rmRepo } = await prompt([
+      {
+        type: 'input',
+        name: 'rmUser',
+        message: 'What is your GitHub user name?'
+      },
+      {
+        type: 'input',
+        name: 'rmRepo',
+        message: 'What is your repository name?'
+      }
+    ])
+    rmObject = await api.getUser(rmUser, rmRepo)
+    if (!rmObject) {
+      console.error('Repo not found!')
+    } else {
+      console.log(`${rmObject.fullName} found!`)
+    }
+  } while (!rmObject)
+  // const ghApi = await api.getUser(rmUser)
+  Object.assign(rmObject, await prompt([
+    // {
+    //   type: 'input',
+    //   name: 'rmTitle',
+    //   message: 'What is the project title?'
+    // },
+    // {
+    //   type: 'input',
+    //   name: 'rmDesc',
+    //   message: 'What is the project description?'
+    // },
+    {
+      type: 'input',
+      name: 'inst',
+      message: 'What are the installation instructions?'
+    },
+    {
+      type: 'input',
+      name: 'use',
+      message: 'What is the usage description?'
+    },
+    // {
+    //   type: 'input',
+    //   name: 'rmLic',
+    //   message: 'What is the license?'
+    // },
+    {
+      type: 'input',
+      name: 'con',
+      message: 'Who are the contributors?'
+    },
+    {
+      type: 'input',
+      name: 'test',
+      message: 'What are the tests?'
+    },
+    {
+      type: 'input',
+      name: 'qs',
+      message: 'Any questions?'
+    }
+  ]))
+  writeToFile(rmObject.title, await generateMarkdown(rmObject))
 }
 
-// function call to initialize program
-init();
-
-
-
-
-
-
-
-
-
-
-
-
-// function promptUser() {
-//   return inquirer.prompt([
-//     {
-//       type: "input",
-//       name: "name",
-//       message: "What is your name?"
-//     },
-//     {
-//       type: "input",
-//       name: "location",
-//       message: "Where are you from?"
-//     },
-//     {
-//       type: "input",
-//       name: "hobby",
-//       message: "What is your favorite hobby?"
-//     },
-//     {
-//       type: "input",
-//       name: "food",
-//       message: "What is your favorite food?"
-//     },
-//     {
-//       type: "input",
-//       name: "github",
-//       message: "Enter your GitHub Username"
-//     },
-//     {
-//       type: "input",
-//       name: "linkedin",
-//       message: "Enter your LinkedIn URL."
-//     }
-//   ]);
-// }
-
-// function generateHTML(answers) {
-//   return `
-// <!DOCTYPE html>
-// <html lang="en">
-// <head>
-//   <meta charset="UTF-8">
-//   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-//   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-//   <title>Document</title>
-// </head>
-// <body>
-//   <div class="jumbotron jumbotron-fluid">
-//   <div class="container">
-//     <h1 class="display-4">Hi! My name is ${answers.name}</h1>
-//     <p class="lead">I am from ${answers.location}.</p>
-//     <h3>Example heading <span class="badge badge-secondary">Contact Me</span></h3>
-//     <ul class="list-group">
-//       <li class="list-group-item">My GitHub username is ${answers.github}</li>
-//       <li class="list-group-item">LinkedIn: ${answers.linkedin}</li>
-//     </ul>
-//   </div>
-// </div>
-// </body>
-// </html>`;
-// }
-
-// async function init() {
-//   console.log("hi")
-//   try {
-//     const answers = await promptUser();
-
-//     const html = generateHTML(answers);
-
-//     await writeFileAsync("index.html", html);
-
-//     console.log("Successfully wrote to index.html");
-//   } catch(err) {
-//     console.log(err);
-//   }
-// }
-
-// init();
+init()

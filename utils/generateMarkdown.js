@@ -1,8 +1,29 @@
-// function to generate markdown for README
-function generateMarkdown(data) {
-  return `# ${data.title}
+const generateMarkdown = (data) => {
+  // return JSON.stringify(data)
+  return `
+<a href="${data.link}" style="float:right"><img src="${data.avatar}" alt="${
+    data.name
+  }" title="${data.name}" width="120" height="120"></a>
 
+# ${data.title.toUpperCase()}
+
+_Repo by ${data.name}_
+
+__Installation:__
+${data.inst}
+
+__Usage:__
+${data.use}
+
+__Contributors:__
+${data.con}
+
+__Tests:__
+${data.test}
+
+__Questions:__
+${data.qs}
 `;
-}
+};
 
 module.exports = generateMarkdown;
